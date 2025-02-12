@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Camera, Pen, Download, Mail, Instagram, Facebook, Twitter } from 'lucide-react';
+import { ArrowRight, Download, Mail, Instagram, Facebook, Twitter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
@@ -50,48 +50,50 @@ const Home = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid lg:grid-cols-2 gap-12 items-center">
-          <motion.div {...fadeIn} className="space-y-8">
-            <h1 className="text-5xl lg:text-6xl font-serif font-light leading-tight">
-              Capturando momentos,<br />creando historias
-            </h1>
-            <p className="text-lg text-stone-600 max-w-lg">
-              Fotógrafa y escritora, especializada en retratos y paisajes. 
-              Transformando momentos cotidianos en obras de arte atemporales.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link to="/contact" className="btn">
-                <Mail className="w-5 h-5 mr-2" />
-                Contactar
-              </Link>
-              <Link to="/cv" className="btn-outline">
-                <Download className="w-5 h-5 mr-2" />
-                Descargar CV
-              </Link>
-            </div>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="relative aspect-[4/5] hidden lg:block"
-          >
-            <img
-              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330"
-              alt="Daniela Cahui"
-              className="object-cover w-full h-full"
-            />
-          </motion.div>
+      <section className="min-h-[80vh] lg:min-h-screen flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div {...fadeIn} className="space-y-8">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-light leading-tight">
+                Capturando momentos,<br />creando historias
+              </h1>
+              <p className="text-lg text-stone-600 max-w-lg">
+                Fotógrafa y escritora, especializada en retratos y paisajes. 
+                Transformando momentos cotidianos en obras de arte atemporales.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link to="/contact" className="btn">
+                  <Mail className="w-5 h-5 mr-2" />
+                  Contactar
+                </Link>
+                <Link to="/cv" className="btn-outline">
+                  <Download className="w-5 h-5 mr-2" />
+                  Descargar CV
+                </Link>
+              </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8 }}
+              className="relative aspect-[4/5] lg:block order-first lg:order-last mb-8 lg:mb-0"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330"
+                alt="Daniela Cahui"
+                className="object-cover w-full h-full"
+              />
+            </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Blog Preview Section */}
-      <section className="py-20 bg-white">
+      <section className="py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeIn} className="flex justify-between items-end mb-12">
+          <motion.div {...fadeIn} className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 gap-4">
             <div>
-              <h2 className="text-3xl font-serif mb-2">Últimas publicaciones</h2>
+              <h2 className="text-2xl sm:text-3xl font-serif mb-2">Últimas publicaciones</h2>
               <p className="text-stone-600">Explorando ideas y compartiendo experiencias</p>
             </div>
             <Link to="/blog" className="group flex items-center text-stone-900">
@@ -107,13 +109,15 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
-                className="card"
+                className="card group"
               >
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="w-full h-48 object-cover mb-6"
-                />
+                <div className="relative overflow-hidden mb-6">
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
                 <div className="space-y-4">
                   <div className="flex gap-2">
                     {post.tags.map(tag => (
@@ -139,11 +143,11 @@ const Home = () => {
       </section>
 
       {/* Gallery Preview */}
-      <section className="py-20">
+      <section className="py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeIn} className="flex justify-between items-end mb-12">
+          <motion.div {...fadeIn} className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 gap-4">
             <div>
-              <h2 className="text-3xl font-serif mb-2">Galería destacada</h2>
+              <h2 className="text-2xl sm:text-3xl font-serif mb-2">Galería destacada</h2>
               <p className="text-stone-600">Una selección de mis mejores trabajos</p>
             </div>
             <Link to="/photos" className="group flex items-center text-stone-900">
@@ -152,7 +156,7 @@ const Home = () => {
             </Link>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8">
             {photos.map((photo, index) => (
               <motion.div
                 key={photo.id}
@@ -178,9 +182,9 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-20 bg-white border-t border-stone-200">
+      <footer className="py-16 lg:py-20 bg-white border-t border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-12">
             <div>
               <h3 className="font-serif text-xl mb-4">Daniela Cahui</h3>
               <p className="text-stone-600">
@@ -202,13 +206,13 @@ const Home = () => {
                 <p>daniela@example.com</p>
                 <p>+51 123 456 789</p>
                 <div className="flex gap-4 pt-4">
-                  <a href="#" className="text-stone-400 hover:text-stone-900">
+                  <a href="#" className="text-stone-400 hover:text-stone-900 transition-colors">
                     <Instagram className="w-5 h-5" />
                   </a>
-                  <a href="#" className="text-stone-400 hover:text-stone-900">
+                  <a href="#" className="text-stone-400 hover:text-stone-900 transition-colors">
                     <Facebook className="w-5 h-5" />
                   </a>
-                  <a href="#" className="text-stone-400 hover:text-stone-900">
+                  <a href="#" className="text-stone-400 hover:text-stone-900 transition-colors">
                     <Twitter className="w-5 h-5" />
                   </a>
                 </div>

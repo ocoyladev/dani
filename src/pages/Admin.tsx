@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { ImagePlus, PenSquare } from 'lucide-react';
 
 const Admin = () => {
@@ -38,36 +38,42 @@ const Admin = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-white p-6 rounded-lg shadow-md"
+          className="bg-white p-6 border border-stone-200"
         >
           <div className="flex items-center mb-4">
-            <PenSquare className="w-8 h-8 text-indigo-600 mr-3" />
-            <h2 className="text-2xl font-semibold">Blog</h2>
+            <PenSquare className="w-8 h-8 text-stone-900 mr-3" />
+            <h2 className="text-2xl font-semibold font-serif">Blog</h2>
           </div>
-          <p className="text-gray-600 mb-6">
+          <p className="text-stone-600 mb-6">
             Administra las entradas de tu blog, crea nuevo contenido y edita las publicaciones existentes.
           </p>
-          <button className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors">
+          <Link 
+            to="/admin/blog"
+            className="w-full btn inline-flex justify-center"
+          >
             Gestionar Blog
-          </button>
+          </Link>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="bg-white p-6 rounded-lg shadow-md"
+          className="bg-white p-6 border border-stone-200"
         >
           <div className="flex items-center mb-4">
-            <ImagePlus className="w-8 h-8 text-indigo-600 mr-3" />
-            <h2 className="text-2xl font-semibold">Fotografías</h2>
+            <ImagePlus className="w-8 h-8 text-stone-900 mr-3" />
+            <h2 className="text-2xl font-semibold font-serif">Fotografías</h2>
           </div>
-          <p className="text-gray-600 mb-6">
+          <p className="text-stone-600 mb-6">
             Sube nuevas fotografías, organiza tu galería y actualiza las descripciones.
           </p>
-          <button className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors">
+          <Link 
+            to="/admin/photos"
+            className="w-full btn inline-flex justify-center"
+          >
             Gestionar Fotografías
-          </button>
+          </Link>
         </motion.div>
       </div>
     </div>

@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     // TODO: Implement actual authentication
-    if (email === 'daniela@example.com' && password === 'password') {
+    if (email === 'danielacmfirmalegal@gmail.com' && password === 'isabella.10') {
       setUser({
         isAuthenticated: true,
         isAdmin: true,
