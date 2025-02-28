@@ -1,37 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Pencil, Trash2, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface Photo {
   id: string;
   title: string;
+  description: string;
   url: string;
-  date: string;
 }
 
 const ManagePhotos = () => {
-  // Sample data - replace with actual data from your backend
-  const [photos] = useState<Photo[]>([
-    {
-      id: '1',
-      title: 'Atardecer en la montaña',
-      url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b',
-      date: '15 Mar 2024'
-    },
-    {
-      id: '2',
-      title: 'Retrato en blanco y negro',
-      url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
-      date: '10 Mar 2024'
-    }
-  ]);
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const navigate = useNavigate();
 
-  const handleDelete = (id: string) => {
+  useEffect(() => {
+    const fetchPhotos = async () => {
+      try {
+        const response = await fetch(`${API_URL}/photos`);
+        const data = await response.json();
+        setPhotos(data);
+      } catch (error) {
+        console.error('Error fetching photos:', error);
+      }
+    };
+
+    fetchPhotos();
+  }, []);
+
+  const handleDelete = async (id: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta fotografía?')) {
-      // Implement delete functionality
-      console.log('Deleting photo:', id);
+      try {
+        await fetch(`${API_URL}/photos/${id}`, {
+          method: 'DELETE',
+        });
+        setPhotos(photos.filter(photo => photo.id !== id));
+      } catch (error) {
+        console.error('Error deleting photo:', error);
+      }
     }
+  };
+
+  const handleEdit = (photo: Photo) => {
+    navigate(`/admin/photos/edit/${photo.id}`, { state: { photo } });
   };
 
   return (
@@ -77,14 +91,14 @@ const ManagePhotos = () => {
               </div>
               <div className="p-4">
                 <h3 className="font-serif text-lg mb-2">{photo.title}</h3>
-                <p className="text-stone-600 text-sm mb-4">{photo.date}</p>
+                <p className="text-stone-600 text-sm mb-4">{photo.description}</p>
                 <div className="flex justify-end gap-2">
-                  <Link
-                    to={`/admin/photos/edit/${photo.id}`}
+                  <button
+                    onClick={() => handleEdit(photo)}
                     className="p-2 text-stone-600 hover:text-stone-900"
                   >
                     <Pencil className="w-4 h-4" />
-                  </Link>
+                  </button>
                   <button
                     onClick={() => handleDelete(photo.id)}
                     className="p-2 text-stone-600 hover:text-red-600"

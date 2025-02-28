@@ -3,18 +3,34 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { formatISO, parseISO } from 'date-fns';
+import { Image } from 'lucide-react';
+import ImageGalleryModal from '../../components/ImageGalleryModal';
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+interface Tag {
+  id: string;
+  name: string;
+}
 
 interface BlogPost {
   id: string;
   title: string;
   content: string;
   status: 'published' | 'draft' | 'archived';
-  date: string;
-  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+  tags: Tag[];
+  photoId?: number;
+  photo?: {
+    id: number;
+    url: string;
+  };
 }
 
 const EditBlogPost = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const isNewPost = !id;
@@ -24,11 +40,13 @@ const EditBlogPost = () => {
     title: '',
     content: '',
     status: 'draft',
-    date: new Date().toISOString().split('T')[0],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     tags: []
   });
 
   const [newTag, setNewTag] = useState('');
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   useEffect(() => {
     if (!user.isAuthenticated || !user.isAdmin) {
@@ -37,35 +55,142 @@ const EditBlogPost = () => {
     }
 
     if (!isNewPost) {
-      // TODO: Fetch post data from backend
-      // For now, using mock data
-      setPost({
-        id: '1',
-        title: 'La luz natural en la fotografía de retrato',
-        content: 'Contenido del post...',
-        status: 'published',
-        date: '2024-03-15',
-        tags: ['Fotografía', 'Técnicas']
-      });
+      const fetchPost = async () => {
+        try {
+          const response = await fetch(`${API_URL}/blog-entries/${id}`);
+          const data = await response.json();
+          setPost(data);
+        } catch (error) {
+          console.error('Error fetching blog post:', error);
+        }
+      };
+
+      fetchPost();
     }
   }, [id, isNewPost, navigate, user]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement save functionality
-    console.log('Saving post:', post);
-    navigate('/admin/blog');
-  };
-
-  const addTag = () => {
-    if (newTag.trim() && !post.tags.includes(newTag.trim())) {
-      setPost({ ...post, tags: [...post.tags, newTag.trim()] });
-      setNewTag('');
+    try {
+      const createdAt = formatISO(parseISO(post.createdAt));
+      const updatedAt = formatISO(parseISO(post.updatedAt));
+      const postId = isNewPost ? undefined : post.id;
+  
+      const updatedPost = {
+        ...post,
+        id: postId,
+        createdAt,
+        updatedAt,
+        photoId: post.photoId // Enviar el photoId en lugar de photo
+      };
+  
+      const method = isNewPost ? 'POST' : 'PATCH';
+      const url = isNewPost ? `${API_URL}/blog-entries` : `${API_URL}/blog-entries/${id}`;
+      
+      await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedPost),
+      });
+  
+      // Si es un nuevo post y tiene photoId, establecer la foto después de crear el post
+      if (isNewPost && post.photoId) {
+        const response = await fetch(url);
+        const newPost = await response.json();
+        await fetch(`${API_URL}/blog-entries/${newPost.id}/photo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(post.photoId),
+        });
+      }
+  
+      navigate('/admin/blog');
+    } catch (error) {
+      console.error('Error saving post:', error);
     }
   };
 
-  const removeTag = (tagToRemove: string) => {
-    setPost({ ...post, tags: post.tags.filter(tag => tag !== tagToRemove) });
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const date = new Date(e.target.value);
+    if (!isNaN(date.getTime())) {
+      setPost({ ...post, updatedAt: formatISO(date) });
+    }
+  };
+
+  const addTag = async () => {
+    const trimmedTag = newTag.trim();
+    if (trimmedTag && !post.tags.some(tag => tag.name === trimmedTag)) {
+      try {
+        // Check if the tag already exists
+        const response = await fetch(`${API_URL}/tags/search?name=${trimmedTag}`);
+        const existingTags = await response.json();
+
+        let tag;
+        if (existingTags.length > 0) {
+          tag = existingTags[0];
+        } else {
+          // Create a new tag if it doesn't exist
+          const createResponse = await fetch(`${API_URL}/tags`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: trimmedTag }),
+          });
+          tag = await createResponse.json();
+        }
+
+        setPost(prevPost => ({
+          ...prevPost,
+          tags: [...prevPost.tags, tag]
+        }));
+        setNewTag('');
+      } catch (error) {
+        console.error('Error adding tag:', error);
+      }
+    }
+  };
+
+  const removeTag = (tagId: string) => {
+    setPost(prevPost => ({
+      ...prevPost,
+      tags: prevPost.tags.filter(tag => tag.id !== tagId)
+    }));
+  };
+
+  const handlePhotoSelect = async (photoId: number) => {
+    try {
+      if (!isNewPost) {
+        // El backend espera recibir el photoId directamente, no dentro de un objeto
+        await fetch(`${API_URL}/blog-entries/${post.id}/photo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify([photoId]),
+        });
+      }
+      
+      setPost(prevPost => ({
+        ...prevPost,
+        photoId,
+        photo: { id: photoId, url: '' } // La URL se actualizará al recargar el post
+      }));
+  
+      // Recargar los datos del post para obtener la URL actualizada
+      if (!isNewPost) {
+        const response = await fetch(`${API_URL}/blog-entries/${post.id}`);
+        const updatedPost = await response.json();
+        setPost(updatedPost);
+      }
+    } catch (error) {
+      console.error('Error setting photo:', error);
+    }
   };
 
   return (
@@ -139,8 +264,8 @@ const EditBlogPost = () => {
               <input
                 type="date"
                 id="date"
-                value={post.date}
-                onChange={(e) => setPost({ ...post, date: e.target.value })}
+                value={post.updatedAt.split('T')[0]}
+                onChange={handleDateChange}
                 className="mt-1 block w-full border-stone-300 rounded-none focus:ring-0 focus:border-stone-900"
               />
             </div>
@@ -153,13 +278,13 @@ const EditBlogPost = () => {
             <div className="flex flex-wrap gap-2 mb-3">
               {post.tags.map((tag) => (
                 <span
-                  key={tag}
+                  key={tag.id}
                   className="inline-flex items-center bg-stone-100 px-3 py-1"
                 >
-                  {tag}
+                  {tag.name}
                   <button
                     type="button"
-                    onClick={() => removeTag(tag)}
+                    onClick={() => removeTag(tag.id)}
                     className="ml-2 text-stone-500 hover:text-stone-700"
                   >
                     <X className="w-4 h-4" />
@@ -185,6 +310,37 @@ const EditBlogPost = () => {
               </button>
             </div>
           </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-stone-700">
+              Imagen Principal
+            </label>
+            <div className="flex items-center gap-4">
+              {post.photo && (
+                <div className="w-40 h-40">
+                  <img
+                    src={post.photo.url}
+                    alt="Imagen principal"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsGalleryOpen(true)}
+                className="btn-outline flex items-center gap-2"
+              >
+                <Image className="w-4 h-4" />
+                {post.photo ? 'Cambiar imagen' : 'Seleccionar imagen'}
+              </button>
+            </div>
+          </div>
+
+          <ImageGalleryModal
+            isOpen={isGalleryOpen}
+            onClose={() => setIsGalleryOpen(false)}
+            onSelect={handlePhotoSelect}
+          />
 
           <div className="flex justify-end gap-4">
             <Link to="/admin/blog" className="btn-outline">

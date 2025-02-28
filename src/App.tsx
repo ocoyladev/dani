@@ -16,6 +16,7 @@ import ManagePhotos from './pages/admin/ManagePhotos';
 import EditBlogPost from './pages/admin/EditBlogPost';
 import EditPhoto from './pages/admin/EditPhoto';
 import NotFound from './pages/NotFound';
+import BlogPost from './pages/BlogPost';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
               <Route path="/photos" element={<Photos />} />
               <Route path="/cv" element={<CV />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
               
               {/* Protected Admin Routes */}
               <Route path="/admin" element={

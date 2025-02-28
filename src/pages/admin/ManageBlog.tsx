@@ -1,41 +1,67 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Pencil, Trash2, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+interface Tag {
+  id: string;
+  name: string;
+}
 
 interface BlogPost {
   id: string;
   title: string;
-  status: 'published' | 'draft';
-  date: string;
-  tags: string[];
+  status: string;
+  updatedAt: string;
+  tags: Tag[];
 }
 
 const ManageBlog = () => {
-  // Sample data - replace with actual data from your backend
-  const [posts] = useState<BlogPost[]>([
-    {
-      id: '1',
-      title: 'La luz natural en la fotografía de retrato',
-      status: 'published',
-      date: '15 Mar 2024',
-      tags: ['Fotografía', 'Técnicas']
-    },
-    {
-      id: '2',
-      title: 'Composición en fotografía de paisajes',
-      status: 'draft',
-      date: '10 Mar 2024',
-      tags: ['Paisajes', 'Composición']
-    }
-  ]);
+  
 
-  const handleDelete = (id: string) => {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);  
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch(`${API_URL}/blog-entries`);
+        const data = await response.json();
+        setPosts(data);
+      } catch (error) {
+        console.error('Error fetching blog posts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  const handleDelete = async (id: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta entrada?')) {
-      // Implement delete functionality
-      console.log('Deleting post:', id);
+      try {
+        await fetch(`${API_URL}/blog-entries/${id}`, {
+          method: 'DELETE',
+        });
+        setPosts(posts.filter(post => post.id !== id));
+      } catch (error) {
+        console.error('Error deleting post:', error);
+      }
     }
   };
+
+  const handleEdit = async (id: string) => {
+    navigate(`/admin/blog/edit/${id}`);
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -84,31 +110,31 @@ const ManageBlog = () => {
                         post.status === 'published'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {post.status === 'published' ? 'Publicado' : 'Borrador'}
+                      }`}>                       
+                        {post.status === 'published' ? 'Publicado' : (post.status === 'draft' ? 'Borrador':'Archivado')}
                       </span>
                     </td>
-                    <td className="py-4 px-6">{post.date}</td>
+                    <td className="py-4 px-6">{post.updatedAt.split('T')[0]}</td>
                     <td className="py-4 px-6">
                       <div className="flex gap-2">
                         {post.tags.map((tag) => (
                           <span
-                            key={tag}
+                            key={tag.id}
                             className="bg-stone-100 text-stone-800 px-2 py-1 text-sm"
                           >
-                            {tag}
+                            {tag.name}
                           </span>
                         ))}
                       </div>
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex justify-end gap-2">
-                        <Link
-                          to={`/admin/blog/edit/${post.id}`}
+                        <button
+                          onClick={() => handleEdit(post.id)}
                           className="p-2 text-stone-600 hover:text-stone-900"
                         >
                           <Pencil className="w-4 h-4" />
-                        </Link>
+                        </button>
                         <button
                           onClick={() => handleDelete(post.id)}
                           className="p-2 text-stone-600 hover:text-red-600"

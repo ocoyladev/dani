@@ -21,7 +21,24 @@ export default {
           900: '#1C1917',
         },
       },
+      typography: (theme) => ({
+        DEFAULT: {
+          css: {
+            color: theme('colors.gray.700'),
+            maxWidth: 'none',
+            p: {
+              marginBottom: theme('spacing.6'),
+            },
+          },
+        },
+      }),
+      backdropFilter: {
+        'none': 'none',
+        'blur': 'blur(8px)',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 };
