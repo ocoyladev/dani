@@ -70,7 +70,9 @@ const BlogPost = () => {
             {/* Layout responsive */}
             <div className="flex flex-col lg:flex-row">
                 {/* Bloque de título e imagen */}
-                <div className="w-full lg:w-1/2 lg:fixed lg:left-0 lg:h-[90vh] p-4 lg:p-8 lg:overflow-y-auto">
+                {/* <div className="w-full lg:w-1/2 lg:fixed lg:left-0 lg:h-[90vh] p-4 lg:p-8 lg:overflow-y-auto"> */}
+                <div className="w-full lg:w-1/2 lg:fixed lg:left-0 lg:h-full p-4 lg:p-8 lg:overflow-y-auto">
+
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
